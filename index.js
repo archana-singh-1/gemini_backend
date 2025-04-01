@@ -15,11 +15,9 @@ const PORT=process.env.PORT
 const mongoDbUrl = process.env.mongoDb;
 
 
-mongoose.connect(mongoDbUrl,{
-    dbName: "b_net",  
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
+
+mongoose.connect(mongoDbUrl, { useNewUrlParser: true, useUnifiedTopology: true })
+
 .then(() => console.log("MongoDB Connected"))
 .catch(err => console.log(err));
 
