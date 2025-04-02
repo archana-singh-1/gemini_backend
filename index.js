@@ -6,7 +6,7 @@ import authRoutes from './router/authRouter.js'
 
 
 const app=express()
-app.use(cors())
+app.use(cors({ origin: 'http://localhost:5173' }));
 dotenv.config();
 app.use(express.json())
 
@@ -21,9 +21,7 @@ mongoose.connect(mongoDbUrl, { useNewUrlParser: true, useUnifiedTopology: true }
 .then(() => console.log("MongoDB Connected"))
 .catch(err => console.log(err));
 
-app.get("/",(req,res)=>{
-    console.log("Done")
-})
+
 
 app.use("/api/auth", authRoutes);
 
