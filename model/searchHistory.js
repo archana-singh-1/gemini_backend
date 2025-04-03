@@ -4,6 +4,7 @@ const searchHistorySchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   history: [
     {
+      title: { type: String, required: true }, 
       query: { type: String, required: true },
       response: { type: String, required: true },
       createdAt: { type: Date, default: Date.now },
