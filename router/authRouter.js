@@ -1,8 +1,7 @@
-
-
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import User from "../model/userSchema.js";
 import SearchHistory from "../model/searchHistory.js";
 
@@ -25,6 +24,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -37,31 +37,50 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign({ userId: user._id, username: user.username }, process.env.JWT_SECRET, { expiresIn: "1h" });
     res.json({ token, userId: user._id, username: user.username });
   } catch (error) {
-    console.error("Login error:", error); // Log the error for debugging
     res.status(500).json({ message: "Error logging in", error });
   }
 });
 
 
 router.post("/search", async (req, res) => {
-  const { userId, query } = req.body;
+  const { userId, query, response } = req.body;
+
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "Invalid user ID" });
+  }
 
   try {
-    const searchEntry = new SearchHistory({ userId, query });
-    await searchEntry.save();
+    const historyEntry = { query, response };
+    const result = await SearchHistory.findOneAndUpdate(
+      { userId: new mongoose.Types.ObjectId(userId) },
+      { $push: { history: historyEntry } },
+      { upsert: true, new: true }
+    );
+
     res.status(201).json({ message: "Search history recorded" });
   } catch (error) {
+    console.error("Error saving search history:", error);
     res.status(500).json({ message: "Error saving search history", error });
   }
 });
 
 router.get("/search-history/:userId", async (req, res) => {
   try {
-    const history = await SearchHistory.find({ userId: req.params.userId }).sort({ createdAt: -1 });
-    res.json(history);
+    const { userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid user ID format" });
+    }
+
+    const history = await SearchHistory.findOne({ userId: new mongoose.Types.ObjectId(userId) });
+
+    res.json(history ? history.history : []);
   } catch (error) {
+    console.error("Error fetching search history:", error);
     res.status(500).json({ message: "Error fetching search history", error });
   }
 });
+
 
 export default router;
