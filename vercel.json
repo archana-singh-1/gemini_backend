@@ -9,7 +9,7 @@
     "routes": [
       {
         "src": "/api/auth(.*)",
-        "dest": "express.js"
+        "dest": "index.js"
       }
     ]
   }
