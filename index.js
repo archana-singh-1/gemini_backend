@@ -6,7 +6,7 @@ import authRoutes from './router/authRouter.js'
 
 
 const app=express()
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors());
 dotenv.config();
 app.use(express.json())
 
@@ -16,7 +16,7 @@ const mongoDbUrl = process.env.mongoDb;
 
 
 
-mongoose.connect(mongoDbUrl, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(mongoDbUrl, {  })
 
 .then(() => console.log("MongoDB Connected"))
 .catch(err => console.log(err));
