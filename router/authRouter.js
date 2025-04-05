@@ -59,6 +59,8 @@ router.post("/search", async (req, res) => {
   }
 
   try {
+    const promptTime = new Date();
+    const responseTime = new Date(); 
     const updated = await SearchHistory.findOneAndUpdate(
       { userId },
       {
@@ -66,21 +68,24 @@ router.post("/search", async (req, res) => {
           chatArr: {
             prompt: userPrompt,
             response: gptResponse,
+            timestamp: new Date(), 
           },
         },
         $setOnInsert: {
           userId,
-          timestamp: new Date(),
+          createdAt: new Date(),
         },
       },
       { upsert: true, new: true }
     );
+    
 
     res.status(201).json({ message: "Chat saved successfully", data: updated });
   } catch (error) {
     res.status(500).json({ message: "Error saving chat", error });
   }
 });
+
 
 router.get("/history/:userId", async (req, res) => {
   const { userId } = req.params;
@@ -125,6 +130,33 @@ router.get("/history/:userId/:query", async (req, res) => {
     res.status(500).json({ message: "Error fetching history", error });
   }
 });
+
+
+router.get("/history", async (req, res) => {
+  const { userId, keyword } = req.query;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "Invalid user ID" });
+  }
+
+  try {
+    const history = await SearchHistory.findOne({ userId });
+
+    if (!history) return res.status(404).json({ message: "No history found" });
+
+    const filteredChats = history.chatArr.filter(chat =>
+      chat.prompt.toLowerCase().includes(keyword.toLowerCase())
+    );
+
+    if (filteredChats.length === 0)
+      return res.status(404).json({ message: "No matching results" });
+
+    res.status(200).json(filteredChats);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching history", error });
+  }
+});
+
 
 
 
