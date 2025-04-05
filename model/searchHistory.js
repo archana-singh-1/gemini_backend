@@ -1,16 +1,28 @@
 import mongoose from "mongoose";
 
+const chatSchema = new mongoose.Schema({
+  prompt: String,
+  response: String,
+  keyword: String,
+  timestamp: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const searchHistorySchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  history: [
-    {
-      title: { type: String, required: true }, 
-      query: { type: String, required: true },
-      response: { type: String, required: true },
-      createdAt: { type: Date, default: Date.now },
-    },
-  ],
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  chatArr: [chatSchema],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const SearchHistory = mongoose.model("SearchHistory", searchHistorySchema);
+
 export default SearchHistory;
